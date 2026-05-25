@@ -4,13 +4,13 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args){
-//Register user
+
         REGISTRATION registration = new REGISTRATION();
         registration.Register();
 
 
         Scanner scanner= new Scanner(System.in);
-        System.out.println("please enter your log in details.");
+        System.out.println("Please enter your log in details.");
         System.out.println("Enter your username.");
         String UserName = scanner.nextLine();
         System.out.println ("Enter your password.");
@@ -24,4 +24,3 @@ public class Main {
 
     }
 }
-
