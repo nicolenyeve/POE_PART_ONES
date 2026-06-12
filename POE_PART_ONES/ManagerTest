@@ -1,0 +1,133 @@
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+public class ManagerTest {
+
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        // Redirect System.out
+        System.setOut(new PrintStream(outContent));
+
+        // Reset messageCount
+        java.lang.reflect.Field messageCountField = Manager.class.getDeclaredField("messageCount");
+        messageCountField.setAccessible(true);
+        messageCountField.setInt(null, 0);
+
+        outContent.reset();
+    }
+// test data message 1
+    @Test
+    public void testMessagesArrayCorrectlyPopulated() {
+        Manager.addMessage("MSG001", "+27718693002", "Hi Mike, can you join us for dinner tonight?", "12:1:HITONIGHT");
+        Manager.addMessage("MSG002", "08575975889", "Hi Keegan, did you receive the payment?", "09:2:HIPAYMENT");
+        Manager.addMessage("MSG003", "+27838884567", "It is dinner time!", "55:3:ITDINNERTIME");
+        Manager.addMessage("MSG004", "0838884567", "Where are you? You are late! I have asked you to be on time.", "77:4:WHEREONTIME");
+
+        Manager.displayFullReport();
+        String output = outContent.toString();
+
+        assertTrue(output.contains("MSG001"));
+        assertTrue(output.contains("+27718693002"));
+        assertTrue(output.contains("Hi Mike, can you join us for dinner tonight?"));
+
+        assertTrue(output.contains("MSG002"));
+        assertTrue(output.contains("08575975889"));
+        assertTrue(output.contains("Hi Keegan, did you receive the payment?"));
+
+        assertTrue(output.contains("MSG003"));
+        assertTrue(output.contains("+27838884567"));
+        assertTrue(output.contains("It is dinner time!"));
+
+        assertTrue(output.contains("MSG004"));
+        assertTrue(output.contains("0838884567"));
+        assertTrue(output.contains("Where are you? You are late! I have asked you to be on time."));
+    }
+// test data message 2
+    @Test
+    public void testDisplayLongestMessage() {
+        Manager.addMessage("MSG001", "+27718693002", "Hi Mike, can you join us for dinner tonight?", "12:1:HITONIGHT");
+        Manager.addMessage("MSG002", "08575975889", "Hi Keegan, did you receive the payment?", "09:2:HIPAYMENT");
+        Manager.addMessage("MSG003", "+27838884567", "It is dinner time!", "55:3:ITDINNERTIME");
+        Manager.addMessage("MSG004", "0838884567", "Where are you? You are late! I have asked you to be on time.", "77:4:WHEREONTIME");
+
+        Manager.displayLongestMessage();
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Where are you? You are late! I have asked you to be on time."));
+    }
+// test data message 3
+    @Test
+    public void testSearchByMessageId() {
+        Manager.addMessage("MSG001", "+27718693002", "Hi Mike, can you join us for dinner tonight?", "12:1:HITONIGHT");
+        Manager.addMessage("MSG002", "08575975889", "Hi Keegan, did you receive the payment?", "09:2:HIPAYMENT");
+        Manager.addMessage("MSG003", "+27838884567", "It is dinner time!", "55:3:ITDINNERTIME");
+        Manager.addMessage("MSG004", "0838884567", "Where are you? You are late! I have asked you to be on time.", "77:4:WHEREONTIME");
+
+        Manager.searchByMessageId("MSG004");
+        String output = outContent.toString();
+        assertTrue(output.contains("Recipient: 0838884567"));
+        assertTrue(output.contains("Message: Where are you? You are late! I asked you to be on time."));
+
+        outContent.reset();
+        Manager.searchByMessageId("NONEXISTENT");
+        output = outContent.toString();
+        assertTrue(output.contains("Message ID was not found."));
+    }
+// test data message 4
+    @Test
+    public void testSearchMessagesByRecipient() {
+        Manager.addMessage("MSG001", "+27718693002", "Hi Mike", "hash1");
+        Manager.addMessage("MSG002", "+27838884567", "It is dinner time!", "hash2");
+        Manager.addMessage("MSG003", "+27838884567", "Where are you? You are late! I have asked you to be on time.", "hash3");
+        Manager.addMessage("MSG004", "+27838884567", "Ok, I am leaving without you.", "hash4");
+
+        Manager.searchMessagesByRecipient("+27838884567");
+        String output = outContent.toString();
+
+        assertTrue(output.contains("It is dinner time!"));
+        assertTrue(output.contains("Where are you? You are late! I have asked you to be on time."));
+        assertTrue(output.contains("Ok, I am leaving without you."));
+    }
+// test data message 5
+    @Test
+    public void testDeleteMessageByHash() {
+        Manager.addMessage("MSG001", "+27718693002", "Hi Mike, can you join us for dinner tonight?", "12:1:HITONIGHT");
+        Manager.addMessage("MSG002", "08575975889", "Where are you? You are late! I have asked you to be on time.", "09:2:WHEREONTIME");
+        Manager.addMessage("MSG003", "+27838884567", "Ok, I am leaving without you.", "55:3:OKYOU");
+
+        Manager.deleteMessageByHash("09:2:WHEREONTIME");
+        String output = outContent.toString();
+        assertTrue(output.contains("Deleting message:"));
+        assertTrue(output.contains("Where are you? You are late! I have asked you to be on time."));
+    }
+// full report
+    @Test
+    public void testDisplayFullReport() {
+        Manager.addMessage("MSG001", "+27718693002", "Hi Mike, can you join us for dinner tonight?", "12:1:HITONIGHT");
+        Manager.addMessage("MSG002", "08575975889", "Hi Keegan, did you receive the payment?", "09:2:HIPAYMENT");
+        Manager.addMessage("MSG003", "+27838884567", "It is dinner time!", "55:3:ITDINNERTIME");
+        Manager.addMessage("MSG004", "+27838884567", "Where are you? You are late! I have asked you to be on time.", "77:4:WHEREONTIME");
+        Manager.addMessage("MSG005", "+27838884567", "Ok, I am leaving without you.", "88:5:OKYOU");
+
+        Manager.displayFullReport();
+        String output = outContent.toString();
+
+        assertTrue(output.contains("MSG001"));
+        assertTrue(output.contains("MSG002"));
+        assertTrue(output.contains("MSG003"));
+        assertTrue(output.contains("MSG004"));
+        assertTrue(output.contains("MSG005"));
+
+        assertTrue(output.contains("Hi Mike, can you join us for dinner tonight?"));
+        assertTrue(output.contains("Hi Keegan, did you receive the payment?"));
+        assertTrue(output.contains("It is dinner time!"));
+        assertTrue(output.contains("Where are you? You are late! I have asked you to be on time."));
+        assertTrue(output.contains("Ok, I am leaving without you."));
+    }
+}
