@@ -1,49 +1,137 @@
-import java.util.Scanner;
 
-public class LOGIN {
-    private String userName;
-    private String password;
-    private String firstName;
-    private String lastName;
-    private static final int MAX_ATTEMPTS = 3;
+    public class Manager {
 
-    // Constructor
-    public LOGIN(String userName, String password, String firstName, String lastName) {
-        this.userName = userName;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
+        private static int size = 100;
 
-    // Method to attempt login with retry limit
-    public String loginUser(String enteredUserName, String enteredPassword) {
-        Scanner scanner = new Scanner(System.in);
-        int attempts = 1;
+        private static String[] messageIds = new String[size];
+        private static String[] recipients = new String[size];
+        private static String[] messages = new String[size];
+        private static String[] hashes = new String[size];
 
-        // Check first attempt
-        if (enteredUserName.equals(userName) && enteredPassword.equals(password)) {
-            System.out.println("Welcome back " + this.firstName + " " + this.lastName + "! It's great to see you again.");
-            MessageApp.startChat();
-            return "Login successful for: " + firstName;
-        }
+        private static int messageCount = 0;
 
-        // Retry up to MAX_ATTEMPTS - 1 more times
-        while (attempts < MAX_ATTEMPTS) {
-            System.out.println("Incorrect username or password. Attempt " + attempts + " of " + MAX_ATTEMPTS);
-            System.out.print("Please re-enter your username: ");
-            enteredUserName = scanner.nextLine();
-            System.out.print("Please re-enter your password: ");
-            enteredPassword = scanner.nextLine();
+        // Add a message
+        public static void addMessage(String id, String recipient,
+                                      String message, String hash) {
 
-            if (enteredUserName.equals(userName) && enteredPassword.equals(password)) {
-                System.out.println("Welcome back " + this.firstName + " " + this.lastName + "! It's great to see you again.");
-
-                return "Login successful for: " + firstName;
+            if (messageCount < size) {
+                messageIds[messageCount] = id;
+                recipients[messageCount] = recipient;
+                messages[messageCount] = message;
+                hashes[messageCount] = hash;
+                messageCount++;
+            } else {
+                System.out.println("Message storage is full.");
             }
-            attempts++;
         }
 
-        System.out.println("Too many failed attempts. Access denied.");
-        return "Login failed - maximum attempts exceeded";
+        // Display recipients
+        public static void displayRecipients() {
+            System.out.println("Recipients:");
+
+            for (int i = 0; i < messageCount; i++) {
+                System.out.println("Recipient: " + recipients[i]);
+            }
+        }
+
+        // Display longest message
+        public static void displayLongestMessage() {
+
+            if (messageCount == 0) {
+                System.out.println("No messages available.");
+                return;
+            }
+
+            int maxIndex = 0;
+
+            for (int i = 1; i < messageCount; i++) {
+                if (messages[i].length() > messages[maxIndex].length()) {
+                    maxIndex = i;
+                }
+            }
+
+            System.out.println("Longest Message:");
+            System.out.println(messages[maxIndex]);
+        }
+
+        // Search by message ID
+        public static void searchByMessageId(String id) {
+
+            for (int i = 0; i < messageCount; i++) {
+
+                if (messageIds[i].equals(id)) {
+
+                    System.out.println("Recipient: " + recipients[i]);
+                    System.out.println("Message: " + messages[i]);
+                    return;
+                }
+            }
+
+            System.out.println("Message ID not found.");
+        }
+
+        // Search by recipient
+        public static void searchMessagesByRecipient(String recipient) {
+
+            boolean found = false;
+
+            for (int i = 0; i < messageCount; i++) {
+
+                if (recipients[i].equals(recipient)) {
+
+                    System.out.println("Message: " + messages[i]);
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                System.out.println("No messages found for recipient: " + recipient);
+            }
+        }
+
+        // Delete message by hash
+        public static void deleteMessageByHash(String hash) {
+
+            for (int i = 0; i < messageCount; i++) {
+
+                if (hashes[i].equals(hash)) {
+
+                    System.out.println("Deleting message:");
+                    System.out.println(messages[i]);
+
+                    for (int j = i; j < messageCount - 1; j++) {
+                        messageIds[j] = messageIds[j + 1];
+                        recipients[j] = recipients[j + 1];
+                        messages[j] = messages[j + 1];
+                        hashes[j] = hashes[j + 1];
+                    }
+
+                    messageCount--;
+                    return;
+                }
+            }
+
+            System.out.println("Hash not found.");
+        }
+
+        // Full report
+        public static void displayFullReport() {
+
+            if (messageCount == 0) {
+                System.out.println("No messages available.");
+                return;
+            }
+
+            System.out.println(" Full message report.");
+
+            for (int i = 0; i < messageCount; i++) {
+
+                System.out.println("Message ID: " + messageIds[i]);
+                System.out.println("Recipient: " + recipients[i]);
+                System.out.println("Message: " + messages[i]);
+                System.out.println("Hash: " + hashes[i]);
+
+            }
+        }
     }
-}
+
